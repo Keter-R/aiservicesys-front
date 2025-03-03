@@ -8,6 +8,12 @@ export default {
     },
     admin: {
         login: `${API_BASE_URL}/admin/login`,
-        // 其他管理员API...
+        serverStatus: `${API_BASE_URL}/admin/server-status`,
+        knowledgeBase:{
+            list: `${API_BASE_URL}/admin/knowledge-base/list`,
+            detail: `${API_BASE_URL}/admin/knowledge-base/detail`,
+            upload: `${API_BASE_URL}/admin/knowledge-base/upload`,
+            delete: `${API_BASE_URL}/admin/knowledge-base/delete`,
+        },
     }
 };
