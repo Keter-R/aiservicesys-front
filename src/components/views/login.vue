@@ -51,11 +51,12 @@ export default {
   methods: {
     async handleLogin() {
       try {
-        const response = await axios.post(apiConfig.user.login, this.loginForm);
-
+        // const response = await axios.post(apiConfig.user.login, this.loginForm);
+        // 伪造响应，模拟登录成功
+        const response = { data: { code: 1, token: 'userToken' } };
         if (response.data.code) {
           localStorage.setItem('token', response.data.token || '');
-          this.$router.push('/');
+          this.$router.push('/chat');  // 修改为跳转到聊天界面
           ElMessage.success('登录成功');
         } else {
           const errorMessage = response.data.message || response.data.error || '登录失败';

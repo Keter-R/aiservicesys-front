@@ -8,6 +8,7 @@ import KnowledgeBase from '../views/admin/KnowledgeBase.vue'
 import QAHistory from '../views/admin/QAHistory.vue'
 import UserManagement from '../views/admin/UserManagement.vue'
 import ModelManagement from '../views/admin/ModelManagement.vue'
+import Chat from '../views/chat.vue'  // 导入新的Chat组件
 
 const routes = [
     {
@@ -23,6 +24,12 @@ const routes = [
         path: '/register',
         name: 'Register',
         component: Registerer
+    },
+    {
+        path: '/chat',
+        name: 'Chat',
+        component: Chat,
+        meta: { requiresAuth: true }  // 添加权限验证
     },
     {
         path: '/admin/login',
@@ -77,7 +84,7 @@ const router = createRouter({
     routes
 })
 
-// 导航守卫，保护管理员路由
+// 导航守卫，保护管理员路由和普通用户路由
 router.beforeEach((to, from, next) => {
     if (to.meta.requiresAdmin) {
         const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -87,6 +94,14 @@ router.beforeEach((to, from, next) => {
             next();
         } else {
             next('/admin/login');
+        }
+    } else if (to.meta.requiresAuth) {  // 添加普通用户的权限验证
+        const token = localStorage.getItem('token');
+
+        if (token) {
+            next();
+        } else {
+            next('/login');
         }
     } else {
         next();

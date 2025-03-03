@@ -5,6 +5,8 @@ export default {
     user: {
         login: `${API_BASE_URL}/user/login`,
         register: `${API_BASE_URL}/user/register`,
+        ask: `${API_BASE_URL}/user/ask`,
+        record: `${API_BASE_URL}/user/record`,
     },
     admin: {
         login: `${API_BASE_URL}/admin/login`,
