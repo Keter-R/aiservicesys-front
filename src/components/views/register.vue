@@ -3,92 +3,119 @@
     <div class="form-card">
       <h1>用户注册</h1>
 
-      <form @submit.prevent="handleRegister">
-        <div class="form-group">
-          <label for="username">用户名</label>
-          <input
-              type="text"
-              id="username"
+      <el-form
+          :model="registerForm"
+          :rules="rules"
+          ref="registerFormRef"
+          label-position="top"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input
               v-model="registerForm.username"
-              placeholder="请输入用户名"
-              required
-          />
-        </div>
+              placeholder="请输入用户名（仅包含字母和数字）"
+          ></el-input>
+        </el-form-item>
 
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input
+        <el-form-item label="密码" prop="password">
+          <el-input
               type="password"
-              id="password"
               v-model="registerForm.password"
-              placeholder="请输入密码"
-              required
-          />
-        </div>
+              placeholder="请输入密码（不少于8位，包含字母、数字和特殊符号）"
+              show-password
+          ></el-input>
+        </el-form-item>
 
-        <div class="form-group">
-          <label for="confirmPassword">确认密码</label>
-          <input
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input
               type="password"
-              id="confirmPassword"
               v-model="registerForm.confirmPassword"
               placeholder="请再次输入密码"
-              required
-          />
-          <p class="error-message" v-if="passwordError">{{ passwordError }}</p>
-        </div>
+              show-password
+          ></el-input>
+        </el-form-item>
 
-        <div class="form-group">
-          <button type="submit" class="btn-submit" :disabled="!!passwordError">注册</button>
-        </div>
+        <el-form-item>
+          <el-button type="primary" class="btn-submit" @click="submitForm">注册</el-button>
+        </el-form-item>
 
         <div class="form-footer">
           <p>已有账号？<router-link to="/login">立即登录</router-link></p>
         </div>
-      </form>
+      </el-form>
     </div>
   </div>
 </template>
 
 <script>
+import { ElMessage } from 'element-plus';
 import apiConfig from '@/components/api/config.js';
 import axios from "axios";
 
 export default {
   name: 'Register',
   data() {
+    // 自定义验证规则
+    const validateConfirmPassword = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error('请再次输入密码'));
+      }
+      if (value !== this.registerForm.password) {
+        return callback(new Error('两次输入的密码不一致'));
+      }
+      callback();
+    };
+
     return {
       registerForm: {
         username: '',
         password: '',
         confirmPassword: ''
+      },
+      rules: {
+        username: [
+          { required: true, message: '用户名不能为空', trigger: 'blur' },
+          { pattern: /^[a-zA-Z0-9]+$/, message: '用户名只能包含字母和数字', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '密码不能为空', trigger: 'blur' },
+          { min: 8, message: '密码长度不能少于8位', trigger: 'blur' },
+          {
+            pattern: /^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+$/,
+            message: '密码只能包含字母、数字和部分特殊符号',
+            trigger: 'blur'
+          }
+        ],
+        confirmPassword: [
+          { required: true, message: '请再次输入密码', trigger: 'blur' },
+          { validator: validateConfirmPassword, trigger: 'blur' }
+        ]
       }
     };
   },
-  computed: {
-    passwordError() {
-      if (this.registerForm.confirmPassword &&
-          this.registerForm.password !== this.registerForm.confirmPassword) {
-        return '两次输入的密码不一致';
-      }
-      return '';
-    }
-  },
   methods: {
-    async handleRegister() {
-      try {
-        const response = await axios.post(apiConfig.user.register, this.registerForm);
-        console.log(response.data);
-        console.log(response)
-        if (response.data.code) {
-          alert(response.data.message);
-          this.$router.push({path: '/login'});
+    submitForm() {
+      this.$refs.registerFormRef.validate(async (valid) => {
+        if (valid) {
+          try {
+            const response = await axios.post(apiConfig.user.register, {
+              username: this.registerForm.username,
+              password: this.registerForm.password
+            });
+
+            if (response.data.code) {
+              ElMessage.success(response.data.message || '注册成功');
+              this.$router.push('/login');
+            } else {
+              ElMessage.error(response.data.message || '注册失败');
+            }
+          } catch (error) {
+            ElMessage.error('服务器异常，请稍后再试');
+          }
         } else {
-          alert(response.data.message || '注册失败');
+          ElMessage.error('请正确填写所有必填项');
+          return false;
         }
-      } catch (error) {
-        alert('服务器异常，请稍后再试');
-      }
+      });
     }
   }
 };
@@ -119,55 +146,12 @@ h1 {
   font-size: 24px;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
+:deep(.el-form-item__label) {
   font-weight: 600;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  transition: border-color 0.3s;
-}
-
-input:focus {
-  border-color: #4a90e2;
-  outline: none;
-}
-
-.error-message {
-  color: #e74c3c;
-  font-size: 14px;
-  margin-top: 6px;
 }
 
 .btn-submit {
   width: 100%;
-  padding: 12px;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.btn-submit:hover {
-  background-color: #357abD;
-}
-
-.btn-submit:disabled {
-  background-color: #b8b8b8;
-  cursor: not-allowed;
 }
 
 .form-footer {
@@ -176,7 +160,7 @@ input:focus {
 }
 
 a {
-  color: #4a90e2;
+  color: var(--el-color-primary);
   text-decoration: none;
 }
 

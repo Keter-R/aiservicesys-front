@@ -1,13 +1,13 @@
 <template>
-  <div class="login-container">
+  <div class="admin-login-container">
     <div class="form-card">
-      <h1>用户登录</h1>
+      <h1>管理员登录</h1>
 
       <el-form :model="loginForm" ref="loginFormRef" label-position="top">
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="管理员账号" prop="username">
           <el-input
               v-model="loginForm.username"
-              placeholder="请输入用户名"
+              placeholder="请输入管理员账号"
           ></el-input>
         </el-form-item>
 
@@ -21,12 +21,11 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" class="btn-submit" @click="handleLogin">登录</el-button>
+          <el-button type="primary" class="btn-submit" @click="handleAdminLogin">管理员登录</el-button>
         </el-form-item>
 
         <div class="form-footer">
-          <p>还没有账号？<router-link to="/register">立即注册</router-link></p>
-          <p>管理员登录？<router-link to="/admin/login">管理员入口</router-link></p>
+          <p>普通用户？<router-link to="/login">用户登录</router-link></p>
         </div>
       </el-form>
     </div>
@@ -39,7 +38,7 @@ import apiConfig from '@/components/api/config.js';
 import axios from 'axios';
 
 export default {
-  name: 'Login',
+  name: 'AdminLogin',
   data() {
     return {
       loginForm: {
@@ -49,14 +48,18 @@ export default {
     };
   },
   methods: {
-    async handleLogin() {
+    async handleAdminLogin() {
       try {
-        const response = await axios.post(apiConfig.user.login, this.loginForm);
+        // 管理员登录API端点
+        // const response = await axios.post(apiConfig.admin.login, this.loginForm);
+        // 单机测试，伪造管理员登录成功
+        const response = { data: { code: 1, token: 'adminToken' } };
 
         if (response.data.code) {
-          localStorage.setItem('token', response.data.token || '');
-          this.$router.push('/');
-          ElMessage.success('登录成功');
+          localStorage.setItem('adminToken', response.data.token || '');
+          localStorage.setItem('isAdmin', 'true');
+          this.$router.push('/admin');
+          ElMessage.success('管理员登录成功');
         } else {
           const errorMessage = response.data.message || response.data.error || '登录失败';
           ElMessage.error(errorMessage);
@@ -75,12 +78,13 @@ export default {
 </script>
 
 <style scoped>
-.login-container {
+.admin-login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   padding: 20px;
+  background-color: #f5f7fa;
 }
 
 .form-card {
@@ -90,6 +94,7 @@ export default {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #409EFF;
 }
 
 h1 {
