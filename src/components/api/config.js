@@ -15,5 +15,8 @@ export default {
             upload: `${API_BASE_URL}/admin/knowledge-base/upload`,
             delete: `${API_BASE_URL}/admin/knowledge-base/delete`,
         },
+        QAHistory: {
+            list: `${API_BASE_URL}/admin/qa-history/list`,
+        },
     }
 };
